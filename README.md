@@ -1,5 +1,15 @@
 # Trusted Trading Crew
 
+
+
+
+![t1](images/t1.jpeg)
+![t2](images/t2.jpeg)
+![t3](images/t3.jpeg)
+![t4](images/t4.jpeg)
+![t5](images/t5.jpeg)
+![t6](images/t6.jpeg)
+
 Awesome—let’s lock this down with a single, copy-pasteable README that your friend can follow to run:
 	•	backend only
 	•	frontend only
