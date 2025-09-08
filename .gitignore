@@ -1,0 +1,24 @@
+# runtime
+.venv/
+__pycache__/
+*.pyc
+uv.lock
+
+# local data & logs
+data/*.sqlite3
+data/*.db
+*.log
+
+# tokens & temp
+*token.txt
+simulate_receipt.json
+live_receipt.json
+latest_receipt.json
+risk_verdict.json
+verify_sig.py
+
+# secrets
+services/**/.env
+*.pem
+!secrets/*_pub.pem   # keep public keys, ignore private keys
+services/orchestrator/strategy.stub.bak
