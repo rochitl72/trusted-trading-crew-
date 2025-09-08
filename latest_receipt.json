@@ -1,0 +1,11 @@
+{
+  "mode": "simulate",
+  "symbol": "AAPL",
+  "side": "BUY",
+  "qty": 5,
+  "avg_price": 200.24,
+  "fees": 0.1001,
+  "filled_at": "2025-09-07T23:00:57.684875",
+  "consent_id": null,
+  "signature": "OkoHsOaZSMg1VCd4/ZEgOoHNi2mQOQ0YaT+BWzAgyAqTRvD1kR4MtBl8g6/SaIqOMLJMH5RMXO2jZmnnj1pRBQ=="
+}

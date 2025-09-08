@@ -1,20 +1,38 @@
 import os
 from fastapi import FastAPI, Body
-from openai import OpenAI
+from pydantic import BaseModel
+from typing import List, Optional
+from services.common.openai_client import get_client, get_model, extract_json
 
-app = FastAPI(title="Analyst Agent")
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-model  = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+PORT = int(os.getenv("PORT", "7010"))
+app = FastAPI(title="Analyst", version="1.0")
+
+class IdeasIn(BaseModel):
+    symbols: Optional[List[str]] = None
+
+@app.get("/health")
+def health():
+    return {"status":"ok"}
 
 @app.post("/ideas")
-def ideas(body: dict = Body(None)):
-    symbols = body.get("symbols", ["AAPL", "MSFT", "TSLA"])
-    prompt = f"Rate these stocks from -1 (strong sell) to +1 (strong buy) with a short rationale: {symbols}"
+def ideas(body: IdeasIn):
+    symbols = body.symbols or ["AAPL","MSFT","TSLA","NVDA"]
+    client = get_client()
+    model = get_model()
+    prompt = f"""
+You are an equity analyst. Score each ticker between -1 and 1, and give a one-line rationale.
+Return STRICT JSON: {{"ideas":[{{"symbol":"SYM","score":0.12,"rationale":"..."}}...]}}.
+Symbols: {symbols}
+"""
     resp = client.chat.completions.create(
         model=model,
-        messages=[{"role": "user", "content": prompt}],
         temperature=0.3,
+        messages=[{"role":"user","content":prompt}]
     )
-    text = resp.choices[0].message.content
-    ideas = [{"symbol": s, "score": 0.0, "rationale": text} for s in symbols]
-    return {"ideas": ideas}
+    raw = resp.choices[0].message.content
+    try:
+        data = extract_json(raw)
+        return data
+    except Exception:
+        # ultra-safe fallback if parsing fails
+        return {"ideas":[{"symbol":s,"score":0.0,"rationale":"model-parse-failed"} for s in symbols]}

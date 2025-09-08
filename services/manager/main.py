@@ -1,22 +1,53 @@
-import os
+import os, random
 from fastapi import FastAPI, Body
-from openai import OpenAI
+from pydantic import BaseModel
+from typing import Optional
+from services.common.openai_client import get_client, get_model, extract_json
 
-app = FastAPI(title="Manager Agent")
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-model  = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+PORT = int(os.getenv("PORT", "7012"))
+app = FastAPI(title="Manager", version="1.0")
+
+class DecideIn(BaseModel):
+    symbol: str
+    sentiment: Optional[str] = None
+    confidence_hint: Optional[float] = None
+    note: Optional[str] = None
+
+@app.get("/health")
+def health():
+    return {"status":"ok"}
 
 @app.post("/decide")
-def decide(body: dict = Body(...)):
-    symbol   = body.get("symbol", "AAPL")
-    ideas    = body.get("ideas", [])
-    insights = body.get("insights", "")
-    prompt = f"""Given the ideas {ideas} and insights {insights},
-decide whether to BUY, SELL, or HOLD {symbol}.
-Return JSON with fields: side, qty (1-10), confidence (0-1)."""
+def decide(body: DecideIn):
+    client = get_client()
+    model = get_model()
+    prompt = f"""
+You are a portfolio manager. Decide a single market order on {body.symbol}.
+Use any hints:
+- sentiment: {body.sentiment}
+- note: {body.note}
+Output STRICT JSON:
+{{
+  "intent": {{
+    "symbol":"{body.symbol}",
+    "side":"BUY"|"SELL",
+    "qty": <int between 1 and 10>,
+    "type":"market",
+    "confidence": <float between 0 and 1>,
+    "source":"manager"
+  }}
+}}
+If uncertain, lower confidence and qty.
+"""
     resp = client.chat.completions.create(
         model=model,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.4,
+        temperature=0.3,
+        messages=[{"role":"user","content":prompt}]
     )
-    return {"symbol": symbol, "decision": resp.choices[0].message.content}
+    raw = resp.choices[0].message.content
+    try:
+        data = extract_json(raw)
+        return data
+    except Exception:
+        # ultra-conservative fallback
+        return {"intent":{"symbol":body.symbol,"side":"BUY","qty":1,"type":"market","confidence":0.3,"source":"manager-fallback"}}

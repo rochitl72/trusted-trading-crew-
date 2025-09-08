@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "reason": "position size too large",
+  "symbol": "AAPL",
+  "side": "BUY",
+  "qty": 2001,
+  "evaluated_at": "2025-09-07T21:37:43.585109",
+  "signature": "7H8NtOHz1hF0fOQtlhsX7KnD4LmRTIB62SteDeZ0WKWmRRSa0L0tIQEpVHIhHHJLQSYcuQD0I/43aD1XMosIAA=="
+}
