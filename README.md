@@ -4,7 +4,6 @@
   <img src="images/w1.jpeg" alt="w1 screenshot" width="800"/>
 </p>
 
-Awesome—let’s lock this down with a single, copy-pasteable README that your friend can follow to run:
 	•	backend only
 	•	frontend only
 	•	full stack (both)
